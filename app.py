@@ -3,8 +3,8 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import os
 import base64
-from openpyxl import Workbook
-from openpyxl.chart import AreaChart3D, Reference
+import openpyxl
+from openpyxl.chart import AreaChart, Reference
 
 def plot_altimetry(data):
     # Convert distance from meters to kilometers and round to 2 decimal places
@@ -26,33 +26,7 @@ def get_excel_download_link(data, filename):
     Function to get the download link for the Excel file.
     """
     excel_output_file = f'static/{filename}.xlsx'
-    
-    # Create a workbook and add the data to the first sheet
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Données"
-    for row in dataframe_to_rows(data, index=False, header=True):
-        ws.append(row)
-    
-    # Add a new sheet for the graph
-    ws_graph = wb.create_sheet(title="Graphique")
-    chart = AreaChart3D()
-    chart.title = "Profil altimétrique"
-    chart.legend = None
-
-    # Define the data range for the chart
-    values = Reference(ws, min_col=2, min_row=1, max_col=2, max_row=len(data) + 1)
-    categories = Reference(ws, min_col=1, min_row=2, max_row=len(data) + 1)
-    chart.add_data(values, titles_from_data=True)
-    chart.set_categories(categories)
-
-    # Add the chart to the worksheet
-    ws_graph.add_chart(chart, "A1")
-
-    # Save the workbook
-    wb.save(excel_output_file)
-    
-    # Generate download link
+    data.to_excel(excel_output_file, index=False)
     with open(excel_output_file, 'rb') as f:
         file_content = f.read()
     base64_encoded = base64.b64encode(file_content).decode()
@@ -102,6 +76,29 @@ if uploaded_file is not None:
     # Display the plot
     st.pyplot(fig)
 
+    # Add a new sheet "graphique" to the Excel file with the 3D area chart
+    filename = 'profil_altimetry.xlsx'
+    workbook = openpyxl.load_workbook(filename)
+    worksheet = workbook.create_sheet(title='graphique')
+
+    # Insert the data from the first sheet (converted_data) into the new sheet
+    for row in converted_data.values:
+        worksheet.append(row)
+
+    # Create a 3D area chart
+    chart = AreaChart()
+    chart.title = "Altimétrie en fonction de la distance"
+    chart.x_axis.title = "Distance (km)"
+    chart.y_axis.title = "Altitude (m)"
+    data = Reference(worksheet, min_col=2, min_row=1, max_col=2, max_row=converted_data.shape[0])
+    categories = Reference(worksheet, min_col=1, min_row=2, max_row=converted_data.shape[0])
+    chart.add_data(data, titles_from_data=True)
+    chart.set_categories(categories)
+    worksheet.add_chart(chart, "D2")
+
+    # Save the modified workbook
+    workbook.save(filename)
+
     # Display the link to download the processed data as Excel
     st.markdown("### Télécharger les données converties:")
-    st.markdown(get_excel_download_link(converted_data, 'profil_altimetry'), unsafe_allow_html=True)
+    st.markdown(get_excel_download_link(converted_data, 'profil_altimmetry'), unsafe_allow_html=True)
