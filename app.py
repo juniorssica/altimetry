@@ -46,7 +46,10 @@ def create_excel_file(data, filename):
     worksheet.insert_chart('A1', chart)
 
     writer.save()
+    writer.close()  # Close the ExcelWriter object
+
     return excel_output_file
+
 
 
 def get_excel_download_link(file_path, filename):
