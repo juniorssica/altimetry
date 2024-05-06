@@ -35,9 +35,8 @@ def create_excel_file(data, filename):
     worksheet = workbook.add_worksheet('Graphique')
 
     # Add chart to 'Graphique' sheet
-    chart = workbook.add_chart({'type': 'area3d'})
+    chart = workbook.add_chart({'type': 'area'})
     chart.add_series({
-        'name': ['Données', 0, 1],
         'categories': ['Données', 1, 0, len(data), 0],
         'values': ['Données', 1, 1, len(data), 1],
         'fill': {'color': '#8B4513'},  # Brown color for the series
@@ -51,6 +50,7 @@ def create_excel_file(data, filename):
 
     writer.save()
     return excel_output_file
+
 
 def get_excel_download_link(file_path, filename):
     """
