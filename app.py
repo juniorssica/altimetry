@@ -19,15 +19,21 @@ def plot_altimetry(data):
 
     return data_grouped
 
-def get_image_download_link(file_path, filename, file_format):
+def get_excel_download_link(data, filename):
     """
-    Function to get the download link for the file.
+    Function to get the download link for the Excel file.
     """
-    with open(file_path, 'rb') as f:
+    excel_output_file = f'static/{filename}.xlsx'
+    data.to_excel(excel_output_file, index=False)
+    with open(excel_output_file, 'rb') as f:
         file_content = f.read()
     base64_encoded = base64.b64encode(file_content).decode()
-    href = f'<a href="data:file/{file_format};base64,{base64_encoded}" download="{filename}.{file_format}">Télécharger le fichier</a>'
+    href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64_encoded}" download="{filename}.xlsx">Télécharger le fichier Excel</a>'
     return href
+
+# Create static folder if it doesn't exist
+if not os.path.exists('static'):
+    os.makedirs('static')
 
 st.title('Analyse d\'altimétrie')
 
@@ -46,13 +52,6 @@ if uploaded_file is not None:
     st.header('Données converties:')
     converted_data = plot_altimetry(data)
     st.write(converted_data)
-
-    # Save the processed data to Excel
-    excel_output_file = 'static/profil_altimetry.xlsx'
-    converted_data.to_excel(excel_output_file, index=False)
-
-    # Display success message
-    st.success(f"Les données ont été enregistrées dans le fichier Excel: {excel_output_file}")
 
     # Plot altimetry profile
     st.header("Profil altimétrique")
@@ -77,4 +76,4 @@ if uploaded_file is not None:
 
     # Display the link to download the processed data as Excel
     st.markdown("### Télécharger les données converties:")
-    st.markdown(get_image_download_link(excel_output_file, 'profil_altimetry', 'xlsx'), unsafe_allow_html=True)
+    st.markdown(get_excel_download_link(converted_data, 'profil_altimetry'), unsafe_allow_html=True)
