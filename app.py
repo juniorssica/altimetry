@@ -45,10 +45,11 @@ def create_excel_file(data, filename):
     chart.set_title({'name': 'Profil altimétrique'})
     worksheet.insert_chart('A1', chart)
 
-    writer.save()
+    writer.save()  # Save the ExcelWriter object
     writer.close()  # Close the ExcelWriter object
 
     return excel_output_file
+
 
 
 
