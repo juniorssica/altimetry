@@ -43,12 +43,11 @@ def create_excel_file(data, filename):
     })
     chart.set_size({'width': 720, 'height': 576})
     chart.set_title({'name': 'Profil altimétrique'})
-    chart.set_perspective(0.1)
-    chart.set_depth_percent(620)
     worksheet.insert_chart('A1', chart)
 
     writer.save()
     return excel_output_file
+
 
 
 
