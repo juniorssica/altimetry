@@ -34,16 +34,7 @@ def create_excel_file(data, filename):
     workbook = writer.book
     worksheet = workbook.add_worksheet('Graphique')
 
-    # Add chart to 'Graphique' sheet
-    chart = workbook.add_chart({'type': 'area'})
-    chart.add_series({
-        'categories': ['Données', 1, 0, len(data), 0],
-        'values': ['Données', 1, 1, len(data), 1],
-        'fill': {'color': '#8B4513'},  # Brown color for the series
-    })
-    chart.set_size({'width': 720, 'height': 576})
-    chart.set_title({'name': 'Profil altimétrique'})
-    worksheet.insert_chart('A1', chart)
+
 
     writer.save()
     return excel_output_file
