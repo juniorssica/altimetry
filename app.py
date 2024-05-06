@@ -3,7 +3,8 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import os
 import base64
-import xlsxwriter
+from openpyxl import Workbook
+from openpyxl.chart import AreaChart3D, Reference
 
 def plot_altimetry(data):
     # Convert distance from meters to kilometers and round to 2 decimal places
@@ -20,40 +21,39 @@ def plot_altimetry(data):
 
     return data_grouped
 
-def create_excel_file(data, filename):
-    """
-    Function to create an Excel file with two sheets: 'Données' and 'Graphique'.
-    'Graphique' sheet contains a 3D Area chart representing the data from the 'Données' sheet.
-    """
-    excel_output_file = f'static/{filename}.xlsx'
-    workbook = xlsxwriter.Workbook(excel_output_file)
-
-    # Write 'Données' sheet
-    data.to_excel(excel_output_file, sheet_name='Données', index=False)
-
-    # Create 'Graphique' sheet
-    worksheet = workbook.add_worksheet('Graphique')
-
-    # Add chart to 'Graphique' sheet
-    chart = workbook.add_chart({'type': 'area'})
-    chart.add_series({
-        'categories': ['Données', 1, 0, len(data), 0],
-        'values': ['Données', 1, 1, len(data), 1],
-        'fill': {'color': '#8B4513'},  # Brown color for the series
-    })
-    chart.set_size({'width': 720, 'height': 576})
-    chart.set_title({'name': 'Profil altimétrique'})
-    worksheet.insert_chart('A1', chart)
-
-    workbook.close()  # Close the workbook object
-
-    return excel_output_file
-
-def get_excel_download_link(file_path, filename):
+def get_excel_download_link(data, filename):
     """
     Function to get the download link for the Excel file.
     """
-    with open(file_path, 'rb') as f:
+    excel_output_file = f'static/{filename}.xlsx'
+    
+    # Create a workbook and add the data to the first sheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Données"
+    for row in dataframe_to_rows(data, index=False, header=True):
+        ws.append(row)
+    
+    # Add a new sheet for the graph
+    ws_graph = wb.create_sheet(title="Graphique")
+    chart = AreaChart3D()
+    chart.title = "Profil altimétrique"
+    chart.legend = None
+
+    # Define the data range for the chart
+    values = Reference(ws, min_col=2, min_row=1, max_col=2, max_row=len(data) + 1)
+    categories = Reference(ws, min_col=1, min_row=2, max_row=len(data) + 1)
+    chart.add_data(values, titles_from_data=True)
+    chart.set_categories(categories)
+
+    # Add the chart to the worksheet
+    ws_graph.add_chart(chart, "A1")
+
+    # Save the workbook
+    wb.save(excel_output_file)
+    
+    # Generate download link
+    with open(excel_output_file, 'rb') as f:
         file_content = f.read()
     base64_encoded = base64.b64encode(file_content).decode()
     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64_encoded}" download="{filename}.xlsx">Télécharger le fichier Excel</a>'
@@ -102,9 +102,6 @@ if uploaded_file is not None:
     # Display the plot
     st.pyplot(fig)
 
-    # Create Excel file with two sheets: 'Données' and 'Graphique'
-    excel_output_file = create_excel_file(converted_data, 'profil_altimetry')
-
     # Display the link to download the processed data as Excel
     st.markdown("### Télécharger les données converties:")
-    st.markdown(get_excel_download_link(excel_output_file, 'profil_altimetry'), unsafe_allow_html=True)
+    st.markdown(get_excel_download_link(converted_data, 'profil_altimetry'), unsafe_allow_html=True)
