@@ -30,9 +30,11 @@ def create_excel_file(data, filename):
     # Write 'Données' sheet
     data.to_excel(writer, sheet_name='Données', index=False)
 
-    # Write 'Graphique' sheet
+    # Create 'Graphique' sheet
     workbook = writer.book
-    worksheet = writer.sheets['Graphique']
+    worksheet = workbook.add_worksheet('Graphique')
+
+    # Add chart to 'Graphique' sheet
     chart = workbook.add_chart({'type': 'area3d'})
     chart.add_series({
         'name': ['Données', 0, 1],
