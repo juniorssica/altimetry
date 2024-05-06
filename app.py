@@ -3,6 +3,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import os
 import base64
+import xlsxwriter
 
 def plot_altimetry(data):
     # Convert distance from meters to kilometers and round to 2 decimal places
@@ -25,13 +26,12 @@ def create_excel_file(data, filename):
     'Graphique' sheet contains a 3D Area chart representing the data from the 'Données' sheet.
     """
     excel_output_file = f'static/{filename}.xlsx'
-    writer = pd.ExcelWriter(excel_output_file, engine='xlsxwriter')
+    workbook = xlsxwriter.Workbook(excel_output_file)
 
     # Write 'Données' sheet
-    data.to_excel(writer, sheet_name='Données', index=False)
+    data.to_excel(excel_output_file, sheet_name='Données', index=False)
 
     # Create 'Graphique' sheet
-    workbook = writer.book
     worksheet = workbook.add_worksheet('Graphique')
 
     # Add chart to 'Graphique' sheet
@@ -45,13 +45,9 @@ def create_excel_file(data, filename):
     chart.set_title({'name': 'Profil altimétrique'})
     worksheet.insert_chart('A1', chart)
 
-    writer.save()  # Save the ExcelWriter object
-    writer.close()  # Close the ExcelWriter object
+    workbook.close()  # Close the workbook object
 
     return excel_output_file
-
-
-
 
 def get_excel_download_link(file_path, filename):
     """
