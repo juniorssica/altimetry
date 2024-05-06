@@ -19,13 +19,42 @@ def plot_altimetry(data):
 
     return data_grouped
 
-def get_excel_download_link(data, filename):
+def create_excel_file(data, filename):
+    """
+    Function to create an Excel file with two sheets: 'Données' and 'Graphique'.
+    'Graphique' sheet contains a 3D Area chart representing the data from the 'Données' sheet.
+    """
+    excel_output_file = f'static/{filename}.xlsx'
+    writer = pd.ExcelWriter(excel_output_file, engine='xlsxwriter')
+
+    # Write 'Données' sheet
+    data.to_excel(writer, sheet_name='Données', index=False)
+
+    # Write 'Graphique' sheet
+    workbook = writer.book
+    worksheet = writer.sheets['Graphique']
+    chart = workbook.add_chart({'type': 'area3d'})
+    chart.add_series({
+        'name': ['Données', 0, 1],
+        'categories': ['Données', 1, 0, len(data), 0],
+        'values': ['Données', 1, 1, len(data), 1],
+        'fill': {'color': '#8B4513'},  # Brown color for the series
+    })
+    chart.set_size({'width': 720, 'height': 576})
+    chart.set_title({'name': 'Profil altimétrique'})
+    chart.set_rotation(50)
+    chart.set_perspective(0.1)
+    chart.set_depth_percent(620)
+    worksheet.insert_chart('A1', chart)
+
+    writer.save()
+    return excel_output_file
+
+def get_excel_download_link(file_path, filename):
     """
     Function to get the download link for the Excel file.
     """
-    excel_output_file = f'static/{filename}.xlsx'
-    data.to_excel(excel_output_file, index=False)
-    with open(excel_output_file, 'rb') as f:
+    with open(file_path, 'rb') as f:
         file_content = f.read()
     base64_encoded = base64.b64encode(file_content).decode()
     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64_encoded}" download="{filename}.xlsx">Télécharger le fichier Excel</a>'
@@ -74,6 +103,9 @@ if uploaded_file is not None:
     # Display the plot
     st.pyplot(fig)
 
+    # Create Excel file with two sheets: 'Données' and 'Graphique'
+    excel_output_file = create_excel_file(converted_data, 'profil_altimetry')
+
     # Display the link to download the processed data as Excel
     st.markdown("### Télécharger les données converties:")
-    st.markdown(get_excel_download_link(converted_data, 'profil_altimetry'), unsafe_allow_html=True)
+    st.markdown(get_excel_download_link(excel_output_file, 'profil_altimetry'), unsafe_allow_html=True)
