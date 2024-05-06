@@ -12,4 +12,5 @@ pandas
 streamlit
 matplotlib
 openpyxl
+xlsxwriter
 ```
