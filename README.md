@@ -11,4 +11,5 @@ You need to install the following librairies (requirements.txt)
 pandas
 streamlit
 matplotlib
+openpyxl
 ```
