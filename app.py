@@ -19,34 +19,13 @@ def plot_altimetry(data):
 
     return data_grouped
 
-def create_excel_file(data, filename):
-    """
-    Function to create an Excel file with two sheets: 'Données' and 'Graphique'.
-    'Graphique' sheet contains a 3D Area chart representing the data from the 'Données' sheet.
-    """
-    excel_output_file = f'static/{filename}.xlsx'
-    writer = pd.ExcelWriter(excel_output_file, engine='xlsxwriter')
-
-    # Write 'Données' sheet
-    data.to_excel(writer, sheet_name='Données', index=False)
-
-    # Create 'Graphique' sheet
-    workbook = writer.book
-    worksheet = workbook.add_worksheet('Graphique')
-
-
-
-    writer.save()
-    return excel_output_file
-
-
-
-
-def get_excel_download_link(file_path, filename):
+def get_excel_download_link(data, filename):
     """
     Function to get the download link for the Excel file.
     """
-    with open(file_path, 'rb') as f:
+    excel_output_file = f'static/{filename}.xlsx'
+    data.to_excel(excel_output_file, index=False)
+    with open(excel_output_file, 'rb') as f:
         file_content = f.read()
     base64_encoded = base64.b64encode(file_content).decode()
     href = f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{base64_encoded}" download="{filename}.xlsx">Télécharger le fichier Excel</a>'
@@ -95,9 +74,6 @@ if uploaded_file is not None:
     # Display the plot
     st.pyplot(fig)
 
-    # Create Excel file with two sheets: 'Données' and 'Graphique'
-    excel_output_file = create_excel_file(converted_data, 'profil_altimetry')
-
     # Display the link to download the processed data as Excel
     st.markdown("### Télécharger les données converties:")
-    st.markdown(get_excel_download_link(excel_output_file, 'profil_altimetry'), unsafe_allow_html=True)
+    st.markdown(get_excel_download_link(converted_data, 'profil_altimetry'), unsafe_allow_html=True)
