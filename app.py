@@ -5,8 +5,8 @@ import os
 import base64
 
 def plot_altimetry(data):
-    # Convert distance from meters to kilometers
-    data['Distance_km'] = data['Distance'] / 1000  
+    # Convert distance from meters to kilometers and round to 2 decimal places
+    data['Distance_km'] = (data['Distance'] / 1000).round(2)
 
     # Create a new column for interval in kilometers
     data['Interval'] = (data['Distance_km'] // 1).astype(int) * 1
@@ -15,7 +15,7 @@ def plot_altimetry(data):
     data_grouped = data.groupby('Interval').mean()
     data_grouped = data_grouped[['Altitude', 'Distance_km']]
     data_grouped.rename(columns={'Altitude': 'Altitude_m'}, inplace=True)
-    data_grouped = data_grouped[['Distance_km', 'Altitude_m']]
+    data_grouped = data_grouped[['Distance_km', 'Altitude_m']].round(2)
 
     return data_grouped
 
