@@ -43,7 +43,11 @@ uploaded_file = st.file_uploader("Télécharger un fichier CSV", type=['csv'])
 
 if uploaded_file is not None:
     # Read CSV data
-    data = pd.read_csv(uploaded_file)
+    try:
+        data = pd.read_csv(uploaded_file, sep='[;,]')
+    except Exception as e:
+        st.error(f"Une erreur s'est produite lors de la lecture du fichier CSV: {e}")
+        st.stop()
 
     st.header('Données chargées:')
     st.write(data)
