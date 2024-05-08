@@ -44,7 +44,8 @@ uploaded_file = st.file_uploader("Télécharger un fichier CSV", type=['csv'])
 if uploaded_file is not None:
     # Read CSV data
     try:
-        data = pd.read_csv(uploaded_file, sep='[;,]')
+        # Modified the way to read the CSV file with the specified format
+        data = pd.read_csv(uploaded_file, sep=';', decimal=',')
     except Exception as e:
         st.error(f"Une erreur s'est produite lors de la lecture du fichier CSV: {e}")
         st.stop()
@@ -63,7 +64,7 @@ if uploaded_file is not None:
 
     # Plot the topographic profile
     ax.fill_between(converted_data['Distance_km'], converted_data['Altitude_m'], color='red', alpha=0.5)
-    ax.plot(converted_data['Distance_km'], converted_data['Altitude_m'], color='black', label='Topography')
+    ax.plot(converted_data['Distance_km'], converted_data['Altitude_m'], color='black', label='Topographie')
 
     # Customize the ticks on the y-axis to show altitude in meters
     ax.set_yticks(range(0, int(max(converted_data['Altitude_m'])) + 1, 100))
